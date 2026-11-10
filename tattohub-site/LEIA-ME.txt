@@ -1,0 +1,6 @@
+TattoHub - site estatico (HTML + JS) ligado ao Supabase.
+
+Publicar na Vercel: crie um projeto novo, escolha "Other" como framework e envie esta pasta (ou use: vercel deploy --prod dentro da pasta).
+Nao ha etapa de build.
+
+Depois de publicar, no Supabase (Authentication > URL Configuration) coloque o endereco da Vercel em Site URL e em Redirect URLs.
