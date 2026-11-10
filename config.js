@@ -1,0 +1,1 @@
+window.TH={url:"https://gzcfvctaemhlctugiwvd.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6Y2Z2Y3RhZW1obGN0dWdpd3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxMDM2OTMsImV4cCI6MjEwOTY3OTY5M30.GeczJU3FADv1vgbSVfzsuAO2pOEAYN3KD3430y6aaFY"};
