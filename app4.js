@@ -55,7 +55,7 @@ ui.sent=true;return render()}
 if(d&&conflict(d,t,st.dur+st.gap)){b.err='Esse horário acabou de ser ocupado. Escolha outro.';b.step=2;b.time='';return render()}
 const cid=upCli(b.name,b.tel,b.email);S.appts.push({id:uid(),cid,style:b.sty.join(', ')||b.svc,desc:`[${b.svc}] ${b.desc}`,part:b.part,date:d,time:t,dur:st.dur,status:'Solicitação recebida',price:null,notes:'Origem: página pública',src:'pagina_publica'});ui.sent=true;commit()}
 const upl=async(blob,name)=>{const path=`${S.sid}/${Date.now()}-${name}.jpg`,{error}=await sb.storage.from('portfolio').upload(path,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;return path};
-const toBlob=u=>fetch(u).then(r=>r.blob());
+const toBlob=u=>{const b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return Promise.resolve(new Blob([a],{type:'image/jpeg'}))};
 async function up(kind,inp){const fs=[...inp.files];if(!fs.length)return;toast('Enviando imagem…');const d=D();
 try{for(const f of fs){if(kind=='gal'&&d.gallery.length>=12){toast('Limite de 12 fotos no portfólio.');break}const src=await img(f,kind=='av'?320:kind=='bn'?1200:900,.8),path=await upl(await toBlob(src),kind);const url=pubUrl(path);
 if(kind=='av'){d.avatar=url;d._avp=path}else if(kind=='bn'){d.banner=url;d._bnp=path}else d.gallery.push({id:uid(),src:url,_p:path,title:'',hide:0})}}catch(e){toast(typeof e=='string'?e:'Não foi possível enviar a imagem.')}
