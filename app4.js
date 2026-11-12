@@ -11,7 +11,7 @@ async function authSubmit(f){const bt=$('#af>.btn:not(.g)'),bl=bt&&bt.textConten
 const au={m:'in'};
 const me=()=>USER?{name:(USER.user_metadata&&USER.user_metadata.full_name)||(S&&S.studio.artist)||'',email:USER.email}:{name:'',email:''};
 const authMsg=e=>{const m=(e&&e.message)||'';return/Invalid login/i.test(m)?'E-mail ou senha incorretos.':/not confirmed/i.test(m)?'Confirme o seu e-mail antes de entrar.':/already registered/i.test(m)?'Já existe uma conta com este e-mail.':/at least/i.test(m)?'A senha precisa ter ao menos 8 caracteres.':/rate limit|too many/i.test(m)?'Muitas tentativas. Aguarde um pouco e tente de novo.':'Não foi possível concluir. Tente novamente.'};
-function authView(m){au.m=m;document.body.classList.add('auth');const f=(l,n,t,x)=>`<label>${l}<input name="${n}" type="${t}" ${x}></label>`,E=f('E-mail','email','email','required autocomplete="email"'),T={in:'Entrar',up:'Criar conta',rec:'Redefinir senha'}[m];
+function authView(m){au.m=m;document.body.classList.add('auth');const f=(l,n,t,x)=>fld(l,n,'',t,x),E=f('E-mail','email','email','required autocomplete="email"'),T={in:'Entrar',up:'Criar conta',rec:'Redefinir senha'}[m];
 const body=m=='in'?E+f('Senha','pw','password','required autocomplete="current-password"')+`<button type="button" class="lk" onclick="authView('rec')">Esqueci minha senha</button>`
 :m=='up'?f('Nome completo','name','text','required autocomplete="name"')+E+f('Senha (mínimo de 8 caracteres)','pw','password','required minlength="8" autocomplete="new-password"')+f('Confirmar senha','pw2','password','required autocomplete="new-password"')
 :E+`<p class="sub">Enviaremos um link para o seu e-mail para você criar uma nova senha.</p>`;
@@ -20,14 +20,14 @@ $('#au').innerHTML=`<form class="mb" id="af"><div class="logo" style="padding:0 
 $('#af').onsubmit=e=>{e.preventDefault();authSubmit(Object.fromEntries(new FormData(e.target)))}}
 const loading=m=>{document.body.classList.add('auth');$('#au').innerHTML=`<div class="mb" style="text-align:center"><div class="logo" style="justify-content:center"><img src="${LG}" alt="TattoHub"></div><p class="sub">${m||'Carregando seus dados…'}</p></div>`};
 function enter(){document.body.classList.remove('auth');ui.dr=null;ui.bk=nbk();ui.sent=false;ui.sel=null;render();checkGoal()}
-async function afterLogin(){loading();try{await loadAll();ui.v='dash';enter()}catch(e){console.error(e);authView('in');$('#aer').textContent='Não foi possível carregar os seus dados. Tente novamente.'}}
+async function afterLogin(){loading();try{await loadAll();ui.v='dash';enter();startRealtime()}catch(e){console.error(e);authView('in');$('#aer').textContent='Não foi possível carregar os seus dados. Tente novamente.'}}
 async function authRun(f){const er=m=>{$('#aer').textContent=m},m=au.m,em=(f.email||'').trim().toLowerCase();
 if(m=='up'){if(f.name.trim().length<3)return er('Informe o seu nome completo.');if(!/^\S+@\S+\.\S+$/.test(em))return er('Informe um e-mail válido.');if(f.pw.length<8)return er('A senha precisa ter ao menos 8 caracteres.');if(f.pw!=f.pw2)return er('As senhas não conferem.');
 const{data,error}=await sb.auth.signUp({email:em,password:f.pw,options:{data:{full_name:f.name.trim()},emailRedirectTo:location.origin}});if(error)return er(authMsg(error));
-if(data.session){USER=data.user;await afterLogin();ui.v='pub';ui.pt='edit';render();toast('Conta criada. Complete o seu perfil público.')}else{authView('in');toast('Conta criada. Confirme o e-mail que enviamos para poder entrar.')}}
+if(data.session){await sb.auth.signOut();USER=null;S=null}authView('in');const ei=document.querySelector('#af [name=email]');if(ei)ei.value=em;toast(data.session?'Conta criada! Entre com o seu e-mail e senha.':'Conta criada! Confirme o e-mail que enviamos e depois entre.')}
 else if(m=='in'){const{data,error}=await sb.auth.signInWithPassword({email:em,password:f.pw});if(error)return er(authMsg(error));USER=data.user;await afterLogin()}
 else{const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin});if(error)return er(authMsg(error));authView('in');toast('Se existir uma conta com este e-mail, enviamos o link de redefinição.')}}
-async function logout(){await sb.auth.signOut();USER=null;S=null;SNAP={};nav(0);cm();authView('in')}
+async function logout(){stopRealtime();await sb.auth.signOut();USER=null;S=null;SNAP={};nav(0);cm();authView('in')}
 async function boot(){const m=location.pathname.match(/^\/t\/([a-z0-9-]{3,40})\/?$/);if(m)return pubBoot(m[1]);
 sb.auth.onAuthStateChange((ev,s)=>{if(ev=='PASSWORD_RECOVERY'&&s){USER=s.user;setTimeout(recoverModal,400)}else if(ev=='SIGNED_OUT'&&S){USER=null;S=null;authView('in')}});
 loading();const{data}=await sb.auth.getSession();if(data.session){USER=data.session.user;await afterLogin()}else authView('in')}
@@ -80,6 +80,16 @@ try{await saveStudio(d)}catch(e){console.error(e);return toast(friendly(e))}
 S.studio=d;ui.dr=null;render();toast('Perfil salvo')}
 function checkGoal(){if(PUB||!S)return;const c=gc(),g=S.goal;if(g.id&&!g.celebrated&&!g._cl&&g.value>0&&c.cur>=g.value){g._cl=1;sb.rpc('claim_goal_celebration',{p_goal:g.id}).then(({data})=>{g._cl=0;if(data){g.celebrated=true;S.ach.unshift({date:TD,value:g.value,type:g.type});celebrate()}else if(data===false)g.celebrated=true})}}
 const commit=()=>{render();return save().then(checkGoal)};
+
+const eyeBtn=`<button type="button" class="eye" onclick="eye(this)" aria-label="Mostrar ou ocultar a senha">${ic('eye')}</button>`;
+function eye(b){const i=b.parentNode.querySelector('input');i.type=i.type=='password'?'text':'password';b.classList.toggle('on')}
+let RT=null;
+function stopRealtime(){if(RT){sb.removeChannel(RT);RT=null}}
+function startRealtime(){stopRealtime();if(!S||!S.sid)return;const f='studio_id=eq.'+S.sid;
+RT=sb.channel('studio-'+S.sid).on('postgres_changes',{event:'INSERT',schema:'public',table:'appointments',filter:f},p=>remoteNew(p.new)).on('postgres_changes',{event:'UPDATE',schema:'public',table:'appointments',filter:f},()=>remoteSync()).subscribe()}
+function remoteSync(){chain=chain.then(async()=>{const[a,c]=await Promise.all([sb.from('appointments').select('*'),sb.from('clients').select('*')]);if(a.error||c.error||!S)return;S.appts=a.data.map(L.appts);S.clients=c.data.map(L.clients);for(const k of['appts','clients'])SNAP[k]=Object.fromEntries(S[k].map(o=>{const r=R[k](o);return[r.id,JSON.stringify(r)]}));render()}).catch(()=>{});return chain}
+async function remoteNew(row){await remoteSync();const a=S&&S.appts.find(x=>x.id==row.id);if(a&&a.src=='pagina_publica'){toast('Nova solicitação de '+cli(a.cid).name);beep()}}
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.setValueAtTime(.08,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.4);o.start();o.stop(c.currentTime+.4)}catch(e){}}
 const V={dash:vDash,agenda:vAgenda,cli:vCli,fin:vFin,meta:vMeta,pub:vPub};
 function render(){if(PUB){$('#pw').innerHTML=pubPage();return}if(!S)return;
 $('#nav').innerHTML=NAV.map(([k,l,i,sh,g],n)=>(n&&NAV[n-1][4]==g?'':`<div class="grp">${g}</div>`)+`<button class="nv${ui.v==k?' on':''}" onclick="go('${k}')">${ic(i)}<span class="ln">${l}</span><span class="ls">${sh}</span></button>`).join('');
