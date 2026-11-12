@@ -30,6 +30,19 @@
      "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gzcfvctaemhlctugiwvd.supabase.co; connect-src 'self' https://gzcfvctaemhlctugiwvd.supabase.co wss://gzcfvctaemhlctugiwvd.supabase.co; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     }
    ]
+  },
+  {
+   "source": "/sw.js",
+   "headers": [
+    {
+     "key": "Cache-Control",
+     "value": "no-cache"
+    },
+    {
+     "key": "Service-Worker-Allowed",
+     "value": "/"
+    }
+   ]
   }
  ]
 }

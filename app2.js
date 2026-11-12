@@ -54,7 +54,7 @@ const mx=Math.max(...M.flatMap(m=>[m.r,m.e]),1);
 const bars=M.map((m,i)=>{const x=i*50+10,h1=m.r/mx*95,h2=m.e/mx*95;return`<rect x="${x}" y="${105-h1}" width="16" height="${h1}" rx="3" fill="#f5f5f5"/><rect x="${x+18}" y="${105-h2}" width="16" height="${h2}" rx="3" fill="#8a8a8a"/><text x="${x+17}" y="122" fill="#858585" font-size="11" text-anchor="middle">${m.l}</text>`}).join('');
 const cnt=ST.map(x=>[x,S.appts.filter(a=>a.status==x).length]).filter(x=>x[1]),tot=cnt.reduce((a,x)=>a+x[1],0);let ac=0;
 const cg=cnt.map(([x,n])=>{const a=ac/tot*100;ac+=n;return`${col(x)} ${a}% ${ac/tot*100}%`}).join(',');
-return`${welcome()}${S.demo?`<div class="card row" style="margin-bottom:16px"><span>Você está vendo <b>dados de demonstração</b>. Eles não são resultados reais.</span><button class="btn r sm" onclick="clearDemo()">Remover dados de demonstração</button></div>`:''}
+return`${pushCard()}${welcome()}${S.demo?`<div class="card row" style="margin-bottom:16px"><span>Você está vendo <b>dados de demonstração</b>. Eles não são resultados reais.</span><button class="btn r sm" onclick="clearDemo()">Remover dados de demonstração</button></div>`:''}
 <div class="row" style="border:0;padding-top:0"><div><h1 class="hi">Olá${nm?', '+esc(nm):''}!</h1><div class="sub">Resumo do seu estúdio · ${PN[ui.per]}</div></div><select aria-label="Período" onchange="ui.per=this.value;ui.pg=1;render()">${Object.entries(PN).map(([k,v])=>`<option value="${k}"${k==ui.per?' selected':''}>${v}</option>`).join('')}</select></div>
 <div class="dg">
 <div class="card hero c5"><div class="hh"><h3>Informações gerais</h3><span class="bd" style="color:#f5f5f5">${PN[ui.per]}</span></div>
