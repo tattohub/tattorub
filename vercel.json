@@ -1,6 +1,10 @@
 {
  "rewrites": [
   {
+   "source": "/t/:slug/:artist",
+   "destination": "/index.html"
+  },
+  {
    "source": "/t/:slug",
    "destination": "/index.html"
   },
