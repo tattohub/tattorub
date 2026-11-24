@@ -27,12 +27,12 @@ const fromTs=i=>{if(!i)return{date:null,time:''};const x=new Date(new Date(i).ge
 const pubUrl=p=>p?sb.storage.from('portfolio').getPublicUrl(p).data.publicUrl:'';
 const catId=n=>(CATS.find(c=>c.name==n)||{}).id||null,catName=i=>(CATS.find(c=>c.id==i)||{}).name||'Outros';
 const ORD=['clients','fixed','artists','appts','pays','exps'],TB={clients:'clients',fixed:'recurring_expenses',artists:'artists',appts:'appointments',pays:'payments',exps:'expenses'};
-const R={artists:a=>({id:a.id,studio_id:S.sid,name:a.name,slug:a.slug,commission_pct:a.pct,active:!!a.on,portal_token:a.token}),clients:c=>({id:c.id,studio_id:S.sid,full_name:c.name,phone:c.phone||null,email:c.email||null,notes:c.notes||null,archived:!!c.arch}),
+const R={artists:a=>({id:a.id,studio_id:S.sid,name:a.name,slug:a.slug,commission_pct:a.pct,active:!!a.on,portal_token:a.token,whatsapp:a.zap||null}),clients:c=>({id:c.id,studio_id:S.sid,full_name:c.name,phone:c.phone||null,email:c.email||null,notes:c.notes||null,archived:!!c.arch}),
 fixed:t=>({id:t.id,studio_id:S.sid,name:t.name,category_id:catId(t.cat),amount:t.amount,due_day:t.day,method:PMK[t.method]||'outro',start_month:t.start+'-01',active:true}),
 appts:a=>({id:a.id,studio_id:S.sid,client_id:a.cid,style:a.style||null,description:a.desc||null,body_part:a.part||null,start_at:toTs(a.date,a.time),duration_min:a.dur,status:STK[a.status],agreed_price:a.price,private_notes:a.notes||null,source:a.src||'painel',allow_overlap:!!a.ov,artist_id:a.art||null}),
 pays:p=>({id:p.id,studio_id:S.sid,appointment_id:p.aid,amount:p.amount,paid_on:p.date,method:PMK[p.method]||'outro'}),
 exps:e=>({id:e.id,studio_id:S.sid,name:e.name,category_id:catId(e.cat),amount:e.amount,expense_date:e.date,kind:e.fx?'fixa':'variavel',method:PMK[e.method]||'outro',recurring_id:e.fx||null,competence:e.comp?e.comp+'-01':null})};
-const L={artists:r=>({id:r.id,name:r.name,slug:r.slug,pct:+r.commission_pct,phone:r.phone||'',on:r.active?1:0,token:r.portal_token}),clients:r=>({id:r.id,name:r.full_name,phone:r.phone||'',email:r.email||'',notes:r.notes||'',arch:r.archived?1:0}),
+const L={artists:r=>({id:r.id,name:r.name,slug:r.slug,pct:+r.commission_pct,phone:r.phone||'',on:r.active?1:0,token:r.portal_token,zap:r.whatsapp||''}),clients:r=>({id:r.id,name:r.full_name,phone:r.phone||'',email:r.email||'',notes:r.notes||'',arch:r.archived?1:0}),
 fixed:r=>({id:r.id,name:r.name,cat:catName(r.category_id),amount:+r.amount,day:r.due_day,method:PMC[r.method],start:r.start_month.slice(0,7)}),
 appts:r=>{const t=fromTs(r.start_at);return{id:r.id,cid:r.client_id,style:r.style||'',desc:r.description||'',part:r.body_part||'',date:t.date,time:t.time,dur:r.duration_min,status:STC[r.status],price:r.agreed_price==null?null:+r.agreed_price,notes:r.private_notes||'',src:r.source,ov:r.allow_overlap,art:r.artist_id||null,cpct:r.commission_pct==null?null:+r.commission_pct}},
 pays:r=>({id:r.id,aid:r.appointment_id,date:r.paid_on,amount:+r.amount,method:PMC[r.method]}),
